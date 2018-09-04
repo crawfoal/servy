@@ -6,6 +6,7 @@ defmodule Servy.Handler do
   """
 
   alias Servy.Conv
+  alias Servy.BearController
 
   @pages_path Path.expand("pages", File.cwd!)
 
@@ -42,12 +43,11 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{ method: "GET", path: "/bears" } = conv) do
-    %{ conv | resp_body: "Teddy, Smokey, Paddington", status: 200 }
+    BearController.index(conv)
   end
 
   def route(%Conv{method: "POST", path: "/bears"} = conv) do
-    %{ conv | status: 201,
-              resp_body: "Created a #{conv.params["type"]} bear named #{conv.params["name"]}!" }
+    BearController.create(conv, conv.params)
   end
 
   def route(%Conv{method: "GET", path: "/about"} = conv) do
@@ -72,13 +72,13 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{ method: "GET", path: "/bears/" <> id } = conv) do
-    Logger.warn "Bear on the loose!"
-    %{ conv | status: 200, resp_body: "Bear #{id}" }
+    params = Map.put(conv.params, "id", id)
+    BearController.show(conv, params)
   end
 
   def route(%Conv{ method: "DELETE", path: "/bears/" <> id } = conv) do
-    Logger.info "Sad day :("
-    %{ conv | status: 200, resp_body: "Bear #{id} deleted" }
+    params = Map.put(conv.params, "id", id) 
+    BearController.delete(conv, params)
   end
 
   def route(%Conv{ path: path } = conv) do
@@ -207,3 +207,18 @@ name=Baloo&type=Brown
 response = Servy.Handler.handle(request)
 
 IO.puts response
+
+request = """
+GET /bears HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 21
+
+"""
+
+response = Servy.Handler.handle(request)
+
+IO.puts response
+
