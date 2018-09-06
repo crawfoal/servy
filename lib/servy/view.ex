@@ -6,6 +6,7 @@ defmodule Servy.View do
       @templates_path
       |> Path.join(template)
       |> EEx.eval_file(bindings)
+      |> String.replace(~r{\s}, "")
 
     %{ conv | status: 200, resp_body: content }
   end

@@ -25,7 +25,6 @@ defmodule Servy.Wildthings do
   end
 
   def delete_bear(id) do
-    Enum.reject(list_bears(), fn bear -> bear.id == id end) 
     Enum.reject(list_bears(), &(&1.id == id))
   end
 end
