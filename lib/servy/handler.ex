@@ -7,6 +7,7 @@ defmodule Servy.Handler do
 
   alias Servy.Conv
   alias Servy.BearController
+  alias Servy.Api
 
   @pages_path Path.expand("pages", File.cwd!)
 
@@ -38,7 +39,7 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{ method: "GET", path: "/api/bears" } = conv) do
-    Servy.Api.BearController.index(conv)
+    Api.BearController.index(conv)
   end
 
   def route(%Conv{method: "POST", path: "/bears"} = conv) do
@@ -74,6 +75,10 @@ defmodule Servy.Handler do
   def route(%Conv{ method: "DELETE", path: "/bears/" <> id } = conv) do
     params = Map.put(conv.params, "id", id) 
     BearController.delete(conv, params)
+  end
+  
+  def route(%Conv{ method: "POST", path: "/api/bears"} = conv) do
+    Api.BearController.create(conv)
   end
 
   def route(%Conv{ path: path } = conv) do

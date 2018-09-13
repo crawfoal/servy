@@ -27,5 +27,9 @@ defmodule Servy.Wildthings do
   def delete_bear(id) do
     Enum.reject(list_bears(), &(&1.id == id))
   end
+
+  def create_bear(attributes) when is_map attributes do 
+    struct(Bear, attributes)
+  end
 end
 
