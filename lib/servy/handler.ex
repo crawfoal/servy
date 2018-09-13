@@ -13,7 +13,7 @@ defmodule Servy.Handler do
 
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
   import Servy.Parser, only: [parse: 1]
-  import Servy.FileHandler, only: [handle_file: 2]
+  import Servy.FileHandler, only: [handle_file: 2, handle_markdown_file: 2]
 
   @doc """
   Transforms the request into a response.
@@ -46,6 +46,13 @@ defmodule Servy.Handler do
     BearController.create(conv, conv.params)
   end
 
+  def route(%Conv{method: "GET", path: "/faq"} = conv) do
+    @pages_path
+    |> Path.join("faq.md")
+    |> File.read!
+    |> handle_markdown_file(conv)
+  end
+
   def route(%Conv{method: "GET", path: "/about"} = conv) do
     @pages_path
     |> Path.join("about.html")
@@ -73,10 +80,10 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{ method: "DELETE", path: "/bears/" <> id } = conv) do
-    params = Map.put(conv.params, "id", id) 
+    params = Map.put(conv.params, "id", id)
     BearController.delete(conv, params)
   end
-  
+
   def route(%Conv{ method: "POST", path: "/api/bears"} = conv) do
     Api.BearController.create(conv)
   end
@@ -94,4 +101,3 @@ defmodule Servy.Handler do
     """
   end
 end
-
