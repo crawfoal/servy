@@ -13,5 +13,6 @@ defmodule Servy.HttpClient do
     {:ok, packet} = :gen_tcp.recv(sock, 0)
     :ok = :gen_tcp.close(sock)
     IO.puts packet
+    {:ok, packet}
   end
 end
