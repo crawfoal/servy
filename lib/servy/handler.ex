@@ -8,6 +8,7 @@ defmodule Servy.Handler do
   alias Servy.Conv
   alias Servy.BearController
   alias Servy.Api
+  alias Servy.VideoCam
 
   @pages_path Path.expand("pages", File.cwd!)
 
@@ -82,6 +83,21 @@ defmodule Servy.Handler do
   def route(%Conv{ method: "DELETE", path: "/bears/" <> id } = conv) do
     params = Map.put(conv.params, "id", id)
     BearController.delete(conv, params)
+  end
+
+  def route(%Conv{ method: "GET", path: "/snapshots" } = conv) do
+    parent = self()
+    spawn(fn -> send(parent, {:snapshot, VideoCam.get_snapshot("cam-1")}) end)
+    spawn(fn -> send(parent, {:snapshot, VideoCam.get_snapshot("cam-2")}) end)
+    spawn(fn -> send(parent, {:snapshot, VideoCam.get_snapshot("cam-3")}) end)
+
+    snapshot1 = receive do {:snapshot, snapshot} -> snapshot end
+    snapshot2 = receive do {:snapshot, snapshot} -> snapshot end
+    snapshot3 = receive do {:snapshot, snapshot} -> snapshot end
+
+    snapshots = [snapshot1, snapshot2, snapshot3]
+
+    %{ conv | status: 200, resp_body: inspect snapshots }
   end
 
   def route(%Conv{ method: "POST", path: "/api/bears"} = conv) do

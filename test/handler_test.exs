@@ -292,6 +292,26 @@ defmodule HandlerTest do
     """
   end
 
+  test "GET /snapshots" do
+    request = """
+    GET /snapshots HTTP/1.1\r
+    Host: example.com\r
+    UserAgent: ExampleBrowser/1.0\r
+    Accept: */*\r
+    \r
+    """
+
+    response = handle(request)
+
+    assert response == """
+    HTTP/1.1 200 OK\r
+    Content-Length: 66\r
+    Content-Type: text/html\r
+    \r
+    ["cam-1-snapshot.jpg", "cam-2-snapshot.jpg", "cam-3-snapshot.jpg"]
+    """
+  end
+
   defp remove_whitespace(text) do
     String.replace(text, ~r{\s}, "")
   end
