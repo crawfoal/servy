@@ -13,26 +13,16 @@ defmodule HttpServerTest do
     assert response.body == "Bears, Lions, Tigers"
   end
 
-  test "demonstrate message sending" do
+  test "smoke test some routes" do
     spawn(HttpServer, :start, [5000])
-    parent = self()
-    max_concurrent_requests = 5
 
-    # Spawn processes that each send a request to HttpServer
-    for _ <- 1..max_concurrent_requests do
-      spawn(fn ->
-        {:ok, response} = HTTPoison.get('http://localhost:5000/wildthings')
-        send(parent, {:ok, response})
-      end)
-    end
-
-    # Wait for each message from the spawned processes, and check that the
-    # message includes a successful response.
-    for _ <- 1..max_concurrent_requests do
-      receive do
-        {:ok, response} ->
-          assert response.status_code == 200
-      end
-    end
+    [
+      'http://localhost:5000/wildthings',
+      'http://localhost:5000/about',
+      'http://localhost:5000/bears'
+    ]
+    |> Enum.map(&Task.async(HTTPoison, :get, [&1]))
+    |> Enum.map(&Task.await/1)
+    |> Enum.each(fn({:ok, response}) -> assert response.status_code == 200 end)
   end
 end
