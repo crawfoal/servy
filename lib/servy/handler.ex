@@ -86,18 +86,16 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{ method: "GET", path: "/snapshots" } = conv) do
-    parent = self()
-    spawn(fn -> send(parent, {:snapshot, VideoCam.get_snapshot("cam-1")}) end)
-    spawn(fn -> send(parent, {:snapshot, VideoCam.get_snapshot("cam-2")}) end)
-    spawn(fn -> send(parent, {:snapshot, VideoCam.get_snapshot("cam-3")}) end)
+    find_bigfoot_task = Task.async(Servy.Tracker, :get_location, ["bigfoot"])
 
-    snapshot1 = receive do {:snapshot, snapshot} -> snapshot end
-    snapshot2 = receive do {:snapshot, snapshot} -> snapshot end
-    snapshot3 = receive do {:snapshot, snapshot} -> snapshot end
+    snapshots =
+      ["cam-1", "cam-2", "cam-3"]
+      |> Enum.map(&Task.async(VideoCam, :get_snapshot, [&1]))
+      |> Enum.map(&Task.await/1)
 
-    snapshots = [snapshot1, snapshot2, snapshot3]
+    where_is_bigfoot = Task.await(find_bigfoot_task)
 
-    %{ conv | status: 200, resp_body: inspect snapshots }
+    %{ conv | status: 200, resp_body: inspect {snapshots, where_is_bigfoot} }
   end
 
   def route(%Conv{ method: "POST", path: "/api/bears"} = conv) do

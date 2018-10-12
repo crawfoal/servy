@@ -292,7 +292,6 @@ defmodule HandlerTest do
     """
   end
 
-  @tag skip: "Flaky because API requests are async, therefore response body order is indeterministic"
   test "GET /snapshots" do
     request = """
     GET /snapshots HTTP/1.1\r
@@ -306,10 +305,10 @@ defmodule HandlerTest do
 
     assert response == """
     HTTP/1.1 200 OK\r
-    Content-Length: 66\r
+    Content-Length: 107\r
     Content-Type: text/html\r
     \r
-    ["cam-1-snapshot.jpg", "cam-2-snapshot.jpg", "cam-3-snapshot.jpg"]
+    {["cam-1-snapshot.jpg", "cam-2-snapshot.jpg", "cam-3-snapshot.jpg"], %{lat: "29.0469 N", lng: "98.8667 W"}}
     """
   end
 
