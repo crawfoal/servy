@@ -303,13 +303,22 @@ defmodule HandlerTest do
 
     response = handle(request)
 
-    assert response == """
+    expected_response = """
     HTTP/1.1 200 OK\r
-    Content-Length: 107\r
+    Content-Length: 255\r
     Content-Type: text/html\r
     \r
-    {["cam-1-snapshot.jpg", "cam-2-snapshot.jpg", "cam-3-snapshot.jpg"], %{lat: "29.0469 N", lng: "98.8667 W"}}
+    <h1>Sensors</h1>
+    <h2>Snapshots</h2>
+    <ul>
+      <li><imgsrc=\"cam-1-snapshot.jpg\"alt=\"snapshot\"></li>
+      <li><imgsrc=\"cam-2-snapshot.jpg\"alt=\"snapshot\"></li>
+      <li><imgsrc=\"cam-3-snapshot.jpg\"alt=\"snapshot\"></li>
+    </ul>
+    <h2>WhereIsBigfoot?</h2>
+    %{lat:\"29.0469N\",lng:\"98.8667W\"}\n
     """
+    assert remove_whitespace(response) == remove_whitespace(expected_response)
   end
 
   defp remove_whitespace(text) do

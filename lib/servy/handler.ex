@@ -15,6 +15,7 @@ defmodule Servy.Handler do
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
   import Servy.Parser, only: [parse: 1]
   import Servy.FileHandler, only: [handle_file: 2, handle_markdown_file: 2]
+  import Servy.View, only: [render: 3]
 
   @doc """
   Transforms the request into a response.
@@ -95,7 +96,8 @@ defmodule Servy.Handler do
 
     where_is_bigfoot = Task.await(find_bigfoot_task)
 
-    %{ conv | status: 200, resp_body: inspect {snapshots, where_is_bigfoot} }
+    view = render(conv, 'sensors.eex',
+      snapshots: snapshots, location: where_is_bigfoot)
   end
 
   def route(%Conv{ method: "POST", path: "/api/bears"} = conv) do
