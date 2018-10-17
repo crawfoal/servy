@@ -96,12 +96,20 @@ defmodule Servy.Handler do
 
     where_is_bigfoot = Task.await(find_bigfoot_task)
 
-    view = render(conv, 'sensors.eex',
+    render(conv, 'sensors.eex',
       snapshots: snapshots, location: where_is_bigfoot)
   end
 
   def route(%Conv{ method: "POST", path: "/api/bears"} = conv) do
     Api.BearController.create(conv)
+  end
+
+  def route(%Conv{method: "POST", path: "/pledges"} = conv) do
+    Servy.PledgeController.create(conv, conv.params)
+  end
+
+  def route(%Conv{method: "GET", path: "/pledges"} = conv) do
+    Servy.PledgeController.index(conv)
   end
 
   def route(%Conv{ path: path } = conv) do
