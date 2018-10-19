@@ -8,6 +8,15 @@ defmodule Servy.FourOhFourCounter do
     pid
   end
 
+  def stop do
+    case Process.whereis(@name) do
+      nil -> :ok
+      pid ->
+        Process.unregister(@name)
+        Process.exit(pid, :normal)
+    end
+  end
+
   def bump_count(path) do
     send @name, {self(), :bump_count, path}
 

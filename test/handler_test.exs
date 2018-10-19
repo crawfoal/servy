@@ -2,6 +2,7 @@ defmodule HandlerTest do
   use ExUnit.Case, async: true
 
   import Servy.Handler, only: [handle: 1]
+  alias Servy.FourOhFourCounter
 
   test "GET /wildthings" do
     request = """
@@ -59,6 +60,8 @@ defmodule HandlerTest do
   end
 
   test "GET /bigfoot" do
+    FourOhFourCounter.stop
+    FourOhFourCounter.start
     request = """
     GET /bigfoot HTTP/1.1\r
     Host: example.com\r
@@ -76,6 +79,7 @@ defmodule HandlerTest do
     \r
     No /bigfoot here!
     """
+    assert FourOhFourCounter.get_count("/bigfoot") == 1
   end
 
   test "GET /bears/1" do

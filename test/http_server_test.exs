@@ -2,7 +2,6 @@ defmodule HttpServerTest do
   use ExUnit.Case, async: true
 
   alias Servy.HttpServer
-  alias Servy.HttpClient
 
   test "GET /wildthings" do
     spawn(HttpServer, :start, [4000])
