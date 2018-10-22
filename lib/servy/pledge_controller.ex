@@ -14,7 +14,7 @@ defmodule Servy.PledgeController do
     # Gets the recent pledges from the cache
     pledges = PledgeServer.recent_pledges()
 
-    %{ conv | status: 200, resp_body: (inspect pledges) }
+    render conv, 'pledges/index.eex', pledges: pledges
   end
 
   def new(conv) do

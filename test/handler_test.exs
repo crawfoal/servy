@@ -325,6 +325,28 @@ defmodule HandlerTest do
     assert remove_whitespace(response) == remove_whitespace(expected_response)
   end
 
+  test "GET /pledges" do
+    Servy.PledgeServer.stop
+    Servy.PledgeServer.start
+    Servy.PledgeServer.create_pledge("Lucas", 10)
+    Servy.PledgeServer.create_pledge("May", 20)
+    Servy.PledgeServer.create_pledge("Ned", 30)
+    request = """
+    GET /pledges HTTP/1.1\r
+    Host: example.com\r
+    UserAgent: ExampleBrowser/1.0\r
+    Accept: */*\r
+    \r
+    """
+
+    response = handle(request)
+
+    assert String.contains?(response, "RecentPledges")
+    assert String.contains?(response, "Lucas:$10")
+    assert String.contains?(response, "May:$20")
+    assert String.contains?(response, "Ned:$30")
+  end
+
   test "GET /pledges/new" do
     request = """
     GET /pledges/new HTTP/1.1\r

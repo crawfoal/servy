@@ -4,6 +4,7 @@ defmodule PledgeServerTest do
   alias Servy.PledgeServer
 
   test "caches the three most recent pledges and total their amounts" do
+    PledgeServer.stop
     PledgeServer.start
     pledge_data = [{'Larry', 10}, {'Moe', 20}, {'Sally', 30}, {'Bob', 40}]
     Enum.each pledge_data, fn({name, amount}) ->

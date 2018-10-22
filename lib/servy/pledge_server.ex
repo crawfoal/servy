@@ -8,6 +8,15 @@ defmodule Servy.PledgeServer do
     pid
   end
 
+  def stop do
+    case Process.whereis(@name) do
+      nil -> :ok
+      pid ->
+        Process.unregister(@name)
+        Process.exit(pid, :normal)
+    end
+  end
+
   def create_pledge(name, amount) do
     send @name, {self(), :create_pledge, name, amount}
 
