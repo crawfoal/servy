@@ -36,8 +36,8 @@ defmodule Servy.PledgeServer do
   def listen_loop(state) do
     receive do
       {sender, :create_pledge, name, amount} ->
-        pledge_id = post_pledge_to_service(name, amount)
-        send sender, {:response, pledge_id}
+        {:ok, _} = post_pledge_to_service(name, amount)
+        send sender, {:response, :ok}
         listen_loop([ {name, amount} | Enum.take(state, 2) ])
       {sender, :recent_pledges} ->
         send sender, {:response, state}
@@ -50,7 +50,10 @@ defmodule Servy.PledgeServer do
     end
   end
 
-  defp post_pledge_to_service(name, _amount) do
-    "#{name}-#{:rand.uniform(1000)}"
+  defp post_pledge_to_service(name, amount) do
+    url = "https://httparrot.herokuapp.com/post"
+    body = ~s({"name": "#{name}", "amount": "#{amount}"})
+    headers = [{"Content-Type", "application/json"}]
+    HTTPoison.post url, body, headers
   end
 end
