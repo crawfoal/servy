@@ -1,6 +1,8 @@
 defmodule Servy.PledgeController do
   alias Servy.PledgeServer
 
+  import Servy.View, only: [render: 3]
+
   def create(conv, %{"name" => name, "amount" => amount}) do
     # Sends the pledge to the external service and caches it
     PledgeServer.create_pledge(name, String.to_integer(amount))
@@ -13,5 +15,9 @@ defmodule Servy.PledgeController do
     pledges = PledgeServer.recent_pledges()
 
     %{ conv | status: 200, resp_body: (inspect pledges) }
+  end
+
+  def new(conv) do
+    render(conv, 'pledges/form.eex', pledge: %{name: '', amount: nil})
   end
 end

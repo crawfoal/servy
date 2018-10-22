@@ -325,6 +325,37 @@ defmodule HandlerTest do
     assert remove_whitespace(response) == remove_whitespace(expected_response)
   end
 
+  test "GET /pledges/new" do
+    request = """
+    GET /pledges/new HTTP/1.1\r
+    Host: example.com\r
+    UserAgent: ExampleBrowser/1.0\r
+    Accept: */*\r
+    \r
+    """
+
+    response = handle(request)
+
+    expected_response = """
+    HTTP/1.1 200 OK\r
+    Content-Length: 197\r
+    Content-Type: text/html\r
+    \r
+    <h1>Make a Pledge!</h1>
+    <form action="/pledges" method="POST">
+      <p>
+        Name:<br/>
+        <input type="text" name="name" placeholder="">
+      </p>
+      <p>
+        Amount:<br/>
+        <input type="number" name="amount" min="1" placeholder="">
+      </p>
+    </form>\n
+    """
+    assert remove_whitespace(response) == remove_whitespace(expected_response)
+  end
+
   defp remove_whitespace(text) do
     String.replace(text, ~r{\s}, "")
   end

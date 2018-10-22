@@ -46,7 +46,9 @@ defmodule Servy.PledgeServer do
         total = state |> Enum.map(&elem(&1, 1)) |> Enum.sum
         send sender, {:response, total}
         listen_loop(state)
-      # TODO: handle unexpected message
+      unexpected ->
+        IO.puts "Unexpected messaged: #{inspect unexpected}"
+        listen_loop(state)
     end
   end
 

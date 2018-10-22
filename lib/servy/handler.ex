@@ -112,6 +112,10 @@ defmodule Servy.Handler do
     Servy.PledgeController.index(conv)
   end
 
+  def route(%Conv{method: "GET", path: "/pledges/new"} = conv) do
+    Servy.PledgeController.new(conv)
+  end
+
   def route(%Conv{ path: path } = conv) do
     %{ conv | resp_body: "No #{path} here!" , status: 404}
   end

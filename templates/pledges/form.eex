@@ -1,0 +1,11 @@
+<h1>Make a Pledge!</h1>
+<form action="/pledges" method="POST">
+  <p>
+    Name:<br/>
+    <input type="text" name="name" placeholder="<%= pledge.name %>">
+  </p>
+  <p>
+    Amount:<br/>
+    <input type="number" name="amount" min="1" placeholder="<%= pledge.amount %>">
+  </p>
+</form>
