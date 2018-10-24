@@ -24,7 +24,7 @@ defmodule Servy.Parser do
   def parse_headers(header_lines) do
     header_lines
     |> Enum.map(&String.split(&1, ": "))
-    |> Enum.reduce(%{}, fn([key, value], acc) -> Map.put(acc, key, value) end) 
+    |> Enum.reduce(%{}, fn([key, value], acc) -> Map.put(acc, key, value) end)
   end
 
   @doc """

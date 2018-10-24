@@ -37,7 +37,7 @@ defmodule HandlerTest do
 
     expected_response = """
     HTTP/1.1 200 OK\r
-    Content-Length: 247\r
+    Content-Length: 356\r
     Content-Type: text/html\r
     \r
     <h1>All The Bears!</h1>
@@ -95,7 +95,7 @@ defmodule HandlerTest do
 
     expected_response = """
     HTTP/1.1 200 OK\r
-    Content-Length: 64\r
+    Content-Length: 77\r
     Content-Type: text/html\r
     \r
     <h1>Show Bear</h1>
@@ -309,7 +309,7 @@ defmodule HandlerTest do
 
     expected_response = """
     HTTP/1.1 200 OK\r
-    Content-Length: 255\r
+    Content-Length: 303\r
     Content-Type: text/html\r
     \r
     <h1>Sensors</h1>
@@ -341,10 +341,10 @@ defmodule HandlerTest do
 
     response = handle(request)
 
-    assert String.contains?(response, "RecentPledges")
-    assert String.contains?(response, "Lucas:$10")
-    assert String.contains?(response, "May:$20")
-    assert String.contains?(response, "Ned:$30")
+    assert String.contains?(response, "Recent Pledges")
+    assert String.contains?(response, "Lucas: $10")
+    assert String.contains?(response, "May: $20")
+    assert String.contains?(response, "Ned: $30")
   end
 
   test "GET /pledges/new" do
@@ -360,7 +360,7 @@ defmodule HandlerTest do
 
     expected_response = """
     HTTP/1.1 200 OK\r
-    Content-Length: 197\r
+    Content-Length: 304\r
     Content-Type: text/html\r
     \r
     <h1>Make a Pledge!</h1>
@@ -372,6 +372,9 @@ defmodule HandlerTest do
       <p>
         Amount:<br/>
         <input type="number" name="amount" min="1" placeholder="">
+      </p>
+      <p>
+        <inputtype=\"submit\"value=\"SubmitPledge\">
       </p>
     </form>\n
     """

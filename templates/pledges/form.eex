@@ -8,4 +8,7 @@
     Amount:<br/>
     <input type="number" name="amount" min="1" placeholder="<%= pledge.amount %>">
   </p>
+  <p>
+    <input type="submit" value="Submit Pledge">
+  </p>
 </form>

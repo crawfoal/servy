@@ -4,7 +4,6 @@ defmodule Servy.HttpServer do
   Starts the server on the given `port` of localhost.
   """
   def start(port) when is_integer(port) and port > 1023 do
-
     # Creates a socket to listen for client connections.
     # `listen_socket` is bound to the listening socket.
     {:ok, listen_socket} =
