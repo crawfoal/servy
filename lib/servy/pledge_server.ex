@@ -1,24 +1,46 @@
 defmodule Servy.GenericServer do
+  def start(callback_module, name, initial_state) do
+    pid = spawn __MODULE__, :listen_loop, [initial_state, callback_module]
+    Process.register(pid, name)
+    pid
+  end
 
+  def stop(name) do
+    case Process.whereis(name) do
+      nil -> :ok
+      pid ->
+        Process.unregister(name)
+        Process.exit(pid, :normal)
+    end
+  end
+
+  def listen_loop(state, callback_module) do
+    receive do
+      {sender, :call, message} when is_pid(sender) ->
+        {response, new_state} = callback_module.handle_call(message, state)
+        send(sender, {:response, response})
+        listen_loop(new_state, callback_module)
+      {:cast, message} ->
+        callback_module.handle_cast(message) |> listen_loop(callback_module)
+      unexpected ->
+        IO.puts "Unexpected messaged: #{inspect unexpected}"
+        listen_loop(state, callback_module)
+    end
+  end
 end
 
 defmodule Servy.PledgeServer do
   @name __MODULE__
 
+  alias Servy.GenericServer
+
   # Client interface functions
   def start do
-    pid = spawn(__MODULE__, :listen_loop, [[]])
-    Process.register(pid, @name)
-    pid
+    GenericServer.start(__MODULE__, @name, [])
   end
 
   def stop do
-    case Process.whereis(@name) do
-      nil -> :ok
-      pid ->
-        Process.unregister(@name)
-        Process.exit(pid, :normal)
-    end
+    GenericServer.stop(@name)
   end
 
   def create_pledge(name, amount) do
@@ -48,21 +70,6 @@ defmodule Servy.PledgeServer do
 
   def cast(name, message) do
     send name, {:cast, message}
-  end
-
-  # Server interface functions
-  def listen_loop(state) do
-    receive do
-      {sender, :call, message} when is_pid(sender) ->
-        {response, new_state} = handle_call(message, state)
-        send(sender, {:response, response})
-        listen_loop(new_state)
-      {:cast, message} ->
-        handle_cast(message) |> listen_loop
-      unexpected ->
-        IO.puts "Unexpected messaged: #{inspect unexpected}"
-        listen_loop(state)
-    end
   end
 
   def handle_call({:create_pledge, name, amount}, state) do
