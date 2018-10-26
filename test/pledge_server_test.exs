@@ -15,4 +15,14 @@ defmodule PledgeServerTest do
     assert PledgeServer.recent_pledges == most_recent_pledges
     assert PledgeServer.total_pledged == 90
   end
+
+  test "clear out the cache" do
+    PledgeServer.stop
+    PledgeServer.start
+    PledgeServer.create_pledge("Sally", 10)
+
+    PledgeServer.clear
+
+    assert Enum.empty? PledgeServer.recent_pledges
+  end
 end

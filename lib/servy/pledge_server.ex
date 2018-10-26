@@ -1,3 +1,7 @@
+defmodule Servy.GenericServer do
+
+end
+
 defmodule Servy.PledgeServer do
   @name __MODULE__
 
@@ -18,48 +22,65 @@ defmodule Servy.PledgeServer do
   end
 
   def create_pledge(name, amount) do
-    send @name, {self(), :create_pledge, name, amount}
-
-    receive do
-      {:response, pledge_id} -> pledge_id
-    end
+    call(@name, {:create_pledge, name, amount})
   end
 
   def recent_pledges do
-    send @name, {self(), :recent_pledges}
-
-    receive do
-      {:response, pledges} -> pledges
-    end
+    call(@name, :recent_pledges)
   end
 
   def total_pledged do
-    send @name, {self(), :total_pledged}
+    call(@name, :total_pledged)
+  end
+
+  def clear do
+    cast(@name, :clear)
+  end
+
+  # Helper Functions
+  def call(name, message) do
+    send name, {self(), :call, message}
 
     receive do
-      {:response, total} -> total
+      {:response, response} -> response
     end
+  end
+
+  def cast(name, message) do
+    send name, {:cast, message}
   end
 
   # Server interface functions
   def listen_loop(state) do
     receive do
-      {sender, :create_pledge, name, amount} ->
-        {:ok, _} = post_pledge_to_service(name, amount)
-        send sender, {:response, :ok}
-        listen_loop([ {name, amount} | Enum.take(state, 2) ])
-      {sender, :recent_pledges} ->
-        send sender, {:response, state}
-        listen_loop(state)
-      {sender, :total_pledged} ->
-        total = state |> Enum.map(&elem(&1, 1)) |> Enum.sum
-        send sender, {:response, total}
-        listen_loop(state)
+      {sender, :call, message} when is_pid(sender) ->
+        {response, new_state} = handle_call(message, state)
+        send(sender, {:response, response})
+        listen_loop(new_state)
+      {:cast, message} ->
+        handle_cast(message) |> listen_loop
       unexpected ->
         IO.puts "Unexpected messaged: #{inspect unexpected}"
         listen_loop(state)
     end
   end
+
+  def handle_call({:create_pledge, name, amount}, state) do
+    {status, _} = post_pledge_to_service(name, amount)
+    new_state = [ {name, amount} | Enum.take(state, 2) ]
+    {status, new_state}
+  end
+
+  def handle_call(:recent_pledges, state) do
+    {state, state}
+  end
+
+  def handle_call(:total_pledged, state) do
+    total = state |> Enum.map(&elem(&1, 1)) |> Enum.sum
+    {total, state}
+  end
+
+  def handle_cast(:clear), do: []
 
   defp post_pledge_to_service(name, amount) do
     url = "https://httparrot.herokuapp.com/post"
