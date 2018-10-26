@@ -1,53 +1,40 @@
 defmodule Servy.FourOhFourCounter do
   @name __MODULE__
 
+  alias Servy.GenericServer
+
   # Client interface functions
   def start do
-    pid = spawn(__MODULE__, :listen_loop, [%{}])
-    Process.register(pid, @name)
-    pid
+    GenericServer.start(__MODULE__, @name, %{})
   end
 
   def stop do
-    case Process.whereis(@name) do
-      nil -> :ok
-      pid ->
-        Process.unregister(@name)
-        Process.exit(pid, :normal)
-    end
+    GenericServer.stop(@name)
   end
 
   def bump_count(path) do
-    send @name, {self(), :bump_count, path}
-
-    receive do {:response} -> :ok end
+    GenericServer.call(@name, {:bump_count, path})
   end
 
   def get_count(path) do
-    send @name, {self(), :get_count, path}
-
-    receive do {:response, count} -> count end
+    GenericServer.call(@name, {:get_count, path})
   end
 
   def get_counts do
-    send @name, {self(), :get_counts}
-
-    receive do {:response, count_map} -> count_map end
+    GenericServer.call(@name, :get_counts)
   end
 
-  # Server interface fucntions
-  def listen_loop(state) do
-    receive do
-      {sender, :bump_count, path} ->
-        state = state |> Map.update(path, 1, &(&1 + 1))
-        send sender, {:response}
-        listen_loop(state)
-      {sender, :get_count, path} ->
-        send sender, {:response, state[path]}
-        listen_loop(state)
-      {sender, :get_counts} ->
-        send sender, {:response, state}
-        listen_loop(state)
-    end
+  # Callback Functions
+  def handle_call({:bump_count, path}, state) do
+    new_state = state |> Map.update(path, 1, &(&1 + 1))
+    {nil, new_state}
+  end
+
+  def handle_call({:get_count, path}, state) do
+    {state[path], state}
+  end
+
+  def handle_call(:get_counts, state) do
+    {state, state}
   end
 end
