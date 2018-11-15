@@ -23,8 +23,8 @@ defmodule Servy.GenericServer do
       {:cast, message} ->
         callback_module.handle_cast(message) |> listen_loop(callback_module)
       unexpected ->
-        IO.puts "Unexpected messaged: #{inspect unexpected}"
-        listen_loop(state, callback_module)
+        new_state = callback_module.handle_info(unexpected, state)
+        listen_loop(new_state, callback_module)
     end
   end
 
