@@ -60,7 +60,6 @@ defmodule HandlerTest do
   end
 
   test "GET /bigfoot" do
-    FourOhFourCounter.stop
     FourOhFourCounter.start
     request = """
     GET /bigfoot HTTP/1.1\r
@@ -80,6 +79,7 @@ defmodule HandlerTest do
     No /bigfoot here!
     """
     assert FourOhFourCounter.get_count("/bigfoot") == 1
+    FourOhFourCounter.stop
   end
 
   test "GET /bears/1" do
@@ -326,7 +326,6 @@ defmodule HandlerTest do
   end
 
   test "GET /pledges" do
-    Servy.PledgeServer.stop
     Servy.PledgeServer.start
     Servy.PledgeServer.create_pledge("Lucas", 10)
     Servy.PledgeServer.create_pledge("May", 20)
@@ -345,6 +344,8 @@ defmodule HandlerTest do
     assert String.contains?(response, "Lucas: $10")
     assert String.contains?(response, "May: $20")
     assert String.contains?(response, "Ned: $30")
+
+    Servy.PledgeServer.stop
   end
 
   test "GET /pledges/new" do

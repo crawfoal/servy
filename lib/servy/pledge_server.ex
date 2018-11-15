@@ -1,52 +1,56 @@
 defmodule Servy.PledgeServer do
   @name __MODULE__
 
-  alias Servy.GenericServer
+  use GenServer
+
+  def init(args) do
+    {:ok, args}
+  end
 
   # Client interface functions
 
   def start do
-    GenericServer.start(__MODULE__, @name, [])
+    GenServer.start(__MODULE__, [], name: @name)
   end
 
   def stop do
-    GenericServer.stop(@name)
+    GenServer.stop(@name)
   end
 
   def create_pledge(name, amount) do
-    GenericServer.call(@name, {:create_pledge, name, amount})
+    GenServer.call(@name, {:create_pledge, name, amount})
   end
 
   def recent_pledges do
-    GenericServer.call(@name, :recent_pledges)
+    GenServer.call(@name, :recent_pledges)
   end
 
   def total_pledged do
-    GenericServer.call(@name, :total_pledged)
+    GenServer.call(@name, :total_pledged)
   end
 
   def clear do
-    GenericServer.cast(@name, :clear)
+    GenServer.cast(@name, :clear)
   end
 
   # Callback Functions
 
-  def handle_call({:create_pledge, name, amount}, state) do
+  def handle_call({:create_pledge, name, amount}, _from, state) do
     {status, _} = post_pledge_to_service(name, amount)
     new_state = [ {name, amount} | Enum.take(state, 2) ]
-    {status, new_state}
+    {:reply, status, new_state}
   end
 
-  def handle_call(:recent_pledges, state) do
-    {state, state}
+  def handle_call(:recent_pledges, _from, state) do
+    {:reply, state, state}
   end
 
-  def handle_call(:total_pledged, state) do
+  def handle_call(:total_pledged, _from, state) do
     total = state |> Enum.map(&elem(&1, 1)) |> Enum.sum
-    {total, state}
+    {:reply, total, state}
   end
 
-  def handle_cast(:clear), do: []
+  def handle_cast(:clear, _state), do: {:noreply, []}
 
   defp post_pledge_to_service(name, amount) do
     url = "https://httparrot.herokuapp.com/post"
