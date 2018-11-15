@@ -43,6 +43,34 @@ defmodule PledgeServerTest do
     PledgeServer.stop
   end
 
+  test "resetting the cache size actually resizes the cache" do
+    PledgeServer.start
+
+    pledge_data = [{"Larry", 10}, {"Moe", 20}, {"Sally", 30}, {"Bob", 40}]
+    Enum.each pledge_data, fn({name, amount}) ->
+      PledgeServer.create_pledge(name, amount)
+    end
+    PledgeServer.set_cache_size(2)
+
+    assert Enum.count(PledgeServer.recent_pledges) == 2
+
+    PledgeServer.stop
+  end
+
+  test "when cache size is increased, recent pledges returns current cache" do
+    PledgeServer.start
+
+    pledge_data = [{"Larry", 10}, {"Moe", 20}, {"Sally", 30}]
+    Enum.each pledge_data, fn({name, amount}) ->
+      PledgeServer.create_pledge(name, amount)
+    end
+    PledgeServer.set_cache_size(4)
+
+    assert Enum.count(PledgeServer.recent_pledges)
+
+    PledgeServer.stop
+  end
+
   test "init fetches recent pledges from service" do
     PledgeServer.start
 
