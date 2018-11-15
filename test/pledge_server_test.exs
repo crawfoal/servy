@@ -39,5 +39,15 @@ defmodule PledgeServerTest do
     end
 
     assert Enum.count(PledgeServer.recent_pledges) == 4
+
+    PledgeServer.stop
+  end
+
+  test "init fetches recent pledges from service" do
+    PledgeServer.start
+
+    refute Enum.empty? PledgeServer.recent_pledges
+
+    PledgeServer.stop
   end
 end

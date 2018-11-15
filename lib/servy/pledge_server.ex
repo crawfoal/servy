@@ -7,10 +7,6 @@ defmodule Servy.PledgeServer do
     defstruct cache_size: 3, pledges: []
   end
 
-  def init(args) do
-    {:ok, args}
-  end
-
   # Client interface functions
 
   def start do
@@ -65,10 +61,21 @@ defmodule Servy.PledgeServer do
     { :noreply, %{ state | cache_size: size } }
   end
 
+  def init(state) do
+    { :ok, %{ state | pledges: fetch_recent_pledges_from_service() } }
+  end
+
   defp post_pledge_to_service(name, amount) do
     url = "https://httparrot.herokuapp.com/post"
     body = ~s({"name": "#{name}", "amount": "#{amount}"})
     headers = [{"Content-Type", "application/json"}]
     HTTPoison.post url, body, headers
+  end
+
+  defp fetch_recent_pledges_from_service do
+    # CODE GOES HERE TO FETCH RECENT PLEDGES FROM EXTERNAL SERVICE
+
+    # Example return value:
+    [ {"wilma", 15}, {"fred", 25} ]
   end
 end
