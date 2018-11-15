@@ -28,4 +28,16 @@ defmodule PledgeServerTest do
 
     PledgeServer.stop
   end
+
+  test "reset the cache size" do
+    PledgeServer.start
+
+    PledgeServer.set_cache_size(4)
+    pledge_data = [{"Larry", 10}, {"Moe", 20}, {"Sally", 30}, {"Bob", 40}]
+    Enum.each pledge_data, fn({name, amount}) ->
+      PledgeServer.create_pledge(name, amount)
+    end
+
+    assert Enum.count(PledgeServer.recent_pledges) == 4
+  end
 end
