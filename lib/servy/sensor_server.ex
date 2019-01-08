@@ -4,33 +4,44 @@ defmodule Servy.SensorServer do
 
   use GenServer
 
+  defmodule State do
+    defstruct sensor_data: %{},
+              refresh_interval: :timer.minutes(60),
+              next_refresh: nil
+  end
+
   # Client Interface
 
   def start do
-    GenServer.start(__MODULE__, %{}, name: @name)
+    GenServer.start(__MODULE__, %State{}, name: @name)
   end
 
   def get_sensor_data do
     GenServer.call @name, :get_sensor_data
   end
 
+  def set_refresh_interval(interval_in_ms) do
+    GenServer.cast @name, {:set_refresh_interval, interval_in_ms}
+  end
+
   # Server Callbacks
 
-  def init(_state) do
-    initial_state = run_tasks_to_get_sensor_data()
-    schedule_refresh()
-    {:ok, initial_state}
+  def init(state) do
+    initial_sensor_data = run_tasks_to_get_sensor_data()
+    state = schedule_refresh(state)
+    {:ok, %State{ state | sensor_data: initial_sensor_data }}
   end
 
-  defp schedule_refresh do
-    Process.send_after(self(), :refresh, :timer.seconds(5))
+  defp schedule_refresh(state) do
+    next_refresh = Process.send_after(self(), :refresh, state.refresh_interval)
+    %State{ state | next_refresh: next_refresh }
   end
 
-  def handle_info(:refresh, _state) do
+  def handle_info(:refresh, state) do
     IO.puts "Refreshing the cache..."
-    new_state = run_tasks_to_get_sensor_data()
-    schedule_refresh()
-    {:noreply, new_state}
+    new_sensor_data = run_tasks_to_get_sensor_data()
+    state = schedule_refresh(state)
+    {:noreply, %State{ state | sensor_data: new_sensor_data }}
   end
 
   def handle_info(unexpected, state) do
@@ -38,8 +49,14 @@ defmodule Servy.SensorServer do
     {:noreply, state}
   end
 
+  def handle_cast({ :set_refresh_interval, interval_in_ms }, state) do
+    Process.cancel_timer(state.next_refresh)
+    state = %State{ state | refresh_interval: interval_in_ms } |> schedule_refresh
+    {:noreply, state}
+  end
+
   def handle_call(:get_sensor_data, _from, state) do
-    {:reply, state, state}
+    {:reply, state.sensor_data, state}
   end
 
   defp run_tasks_to_get_sensor_data do
