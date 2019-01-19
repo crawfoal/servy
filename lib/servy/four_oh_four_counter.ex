@@ -7,11 +7,12 @@ defmodule Servy.FourOhFourCounter do
     {:ok, args}
   end
 
-  # Client interface functions
-  def start do
-    GenServer.start(__MODULE__, %{}, name: @name)
+  def start_link(_arg) do
+    IO.puts "Starting the 404 counter..."
+    GenServer.start_link(__MODULE__, %{}, name: @name)
   end
 
+  # Client interface functions
   def stop do
     GenServer.stop(@name)
   end
