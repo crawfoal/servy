@@ -15,7 +15,7 @@ defmodule Servy.HttpServer do
     # `active: false` - receive data when we're ready by calling `:gen_tcp.recv/2`
     # `reuseaddr: true` - allows reusing the address if the listener crashes
 
-    # IO.puts "\n🎧  Listening for connection requests on port #{port}...\n"
+    IO.puts "\n🎧  Listening for connection requests on port #{port}...\n"
 
     accept_loop(listen_socket)
   end
